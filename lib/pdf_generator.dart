@@ -23,27 +23,28 @@ class PdfGenerator {
   Future<pw.Document> generatePdf() async {
     final pdf = pw.Document();
     final random = Random();
-    final shuffledEntries = List<String>.from(entries)..shuffle(random);
 
     final pageFormat = _getPageFormat(bingosPerPage);
     final pages = (bingoCount / bingosPerPage).ceil();
+    final rows = sqrt(bingosPerPage).toInt();
+    final cols = (bingosPerPage / rows).ceil();
 
     for (int i = 0; i < pages; i++) {
       pdf.addPage(
         pw.Page(
+          margin: const pw.EdgeInsets.all(0),
           pageFormat: pageFormat,
           build: (context) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(title,
-                    style: pw.TextStyle(
-                        fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 8),
-                pw.Text(description, style: pw.TextStyle(fontSize: 16)),
-                pw.SizedBox(height: 16),
-                _buildBingoTables(context, shuffledEntries, i),
-              ],
+            return pw.GridView(
+              childAspectRatio: 1,
+              crossAxisCount: cols,
+              children: List.generate(bingosPerPage, (index) {
+                final shuffledEntries = List<String>.from(entries)
+                  ..shuffle(random);
+
+                return _buildBingoTable(
+                    context, shuffledEntries, bingosPerPage);
+              }),
             );
           },
         ),
@@ -67,45 +68,18 @@ class PdfGenerator {
     }
   }
 
-  pw.Widget _buildBingoTables(
-      pw.Context context, List<String> entries, int pageIndex) {
-    final startIndex = pageIndex * bingosPerPage * gridSize * gridSize;
-
-    return pw.Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: List.generate(bingosPerPage, (index) {
-        final bingoStartIndex = startIndex + index * gridSize * gridSize;
-        final bingoEndIndex =
-            min(bingoStartIndex + gridSize * gridSize, entries.length);
-
-        List<String> bingoEntries;
-        if (bingoStartIndex < entries.length) {
-          bingoEntries = entries.sublist(bingoStartIndex, bingoEndIndex);
-        } else {
-          bingoEntries = [];
-        }
-
-        // Fill remaining cells with empty strings if the list is too short
-        while (bingoEntries.length < gridSize * gridSize) {
-          bingoEntries.add('');
-        }
-
-        return _buildBingoTable(context, bingoEntries);
-      }),
-    );
-  }
-
-  pw.Widget _buildBingoTable(pw.Context context, List<String> entries) {
+  pw.Widget _buildBingoTable(
+      pw.Context context, List<String> entries, int bingosPerPage) {
     return pw.Table(
+      tableWidth: pw.TableWidth.min,
       border: pw.TableBorder.all(),
       children: List.generate(gridSize, (row) {
         return pw.TableRow(
           children: List.generate(gridSize, (col) {
             final index = row * gridSize + col;
             return pw.Container(
-              width: 50,
-              height: 50,
+              width: 100 / sqrt(bingosPerPage),
+              height: 100 / sqrt(bingosPerPage),
               alignment: pw.Alignment.center,
               child: pw.Text(
                 index < entries.length ? entries[index] : '',

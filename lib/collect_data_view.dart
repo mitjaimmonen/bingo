@@ -48,7 +48,7 @@ class _CollectDataViewState extends State<CollectDataView> {
                 decoration: const InputDecoration(
                   labelText: 'Bingo Entries (line break separated)',
                 ),
-                maxLines: 20,
+                maxLines: 10,
                 minLines: 5,
                 keyboardType: TextInputType.multiline,
               ),

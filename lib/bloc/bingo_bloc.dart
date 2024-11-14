@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 part 'bingo_event.dart';
 part 'bingo_state.dart';
@@ -22,6 +23,7 @@ class BingoBloc extends Bloc<BingoEvent, BingoState> {
         description: event.description,
         bingosPerPage: event.bingosPerPage,
         bingoCount: event.bingoCount,
+        backgroundImage: event.backgroundImage,
       ));
     });
   }

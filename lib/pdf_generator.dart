@@ -10,6 +10,7 @@ class PdfGenerator {
   final String description;
   final int bingosPerPage;
   final int bingoCount;
+  final pw.MemoryImage? backgroundImage;
 
   PdfGenerator({
     required this.entries,
@@ -18,6 +19,7 @@ class PdfGenerator {
     required this.description,
     required this.bingosPerPage,
     required this.bingoCount,
+    this.backgroundImage,
   });
 
   Future<pw.Document> generatePdf() async {
@@ -36,14 +38,19 @@ class PdfGenerator {
           pageFormat: pageFormat,
           build: (context) {
             return pw.GridView(
-              childAspectRatio: 1,
               crossAxisCount: cols,
               children: List.generate(bingosPerPage, (index) {
                 final shuffledEntries = List<String>.from(entries)
                   ..shuffle(random);
 
-                return _buildBingoTable(
-                    context, shuffledEntries, bingosPerPage);
+                return _buildBingo(
+                  context,
+                  shuffledEntries,
+                  bingosPerPage,
+                  backgroundImage: backgroundImage,
+                  title: title,
+                  description: description,
+                );
               }),
             );
           },
@@ -68,27 +75,72 @@ class PdfGenerator {
     }
   }
 
-  pw.Widget _buildBingoTable(
-      pw.Context context, List<String> entries, int bingosPerPage) {
-    return pw.Table(
+  pw.Widget _buildBingo(
+    pw.Context context,
+    List<String> entries,
+    int bingosPerPage, {
+    pw.MemoryImage? backgroundImage,
+    String? title,
+    String? description,
+  }) {
+    final table = pw.Table(
       tableWidth: pw.TableWidth.min,
       border: pw.TableBorder.all(),
-      children: List.generate(gridSize, (row) {
-        return pw.TableRow(
-          children: List.generate(gridSize, (col) {
-            final index = row * gridSize + col;
-            return pw.Container(
-              width: 100 / sqrt(bingosPerPage),
-              height: 100 / sqrt(bingosPerPage),
-              alignment: pw.Alignment.center,
-              child: pw.Text(
-                index < entries.length ? entries[index] : '',
+      children: List.generate(
+        gridSize,
+        (row) {
+          return pw.TableRow(
+            children: List.generate(gridSize, (col) {
+              final index = row * gridSize + col;
+              return pw.Container(
+                width: 80 / sqrt(bingosPerPage),
+                height: 80 / sqrt(bingosPerPage),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  index < entries.length ? entries[index] : '',
+                  textAlign: pw.TextAlign.center,
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+
+    return pw.Stack(
+      children: [
+        if (backgroundImage != null)
+          pw.Positioned.fill(
+            child: pw.Image(
+              backgroundImage,
+              fit: pw.BoxFit.cover,
+            ),
+          ),
+        pw.Column(
+          children: [
+            pw.SizedBox(height: 16),
+            if (title != null)
+              pw.Text(
+                title,
+                style:
+                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
                 textAlign: pw.TextAlign.center,
               ),
-            );
-          }),
-        );
-      }),
+            if (description != null)
+              pw.Text(
+                description,
+                style: const pw.TextStyle(fontSize: 16),
+                textAlign: pw.TextAlign.center,
+              ),
+            pw.Expanded(
+                child: pw.Align(
+              alignment: pw.Alignment.bottomCenter,
+              child: table,
+            )),
+            pw.SizedBox(height: 16),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,10 @@
+import 'dart:html' as html;
+
 import 'package:bingo/bloc/bingo_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class CollectDataView extends StatefulWidget {
   const CollectDataView({super.key});
@@ -17,6 +21,27 @@ class _CollectDataViewState extends State<CollectDataView> {
       TextEditingController();
   final TextEditingController _bingoCountController = TextEditingController();
   int _gridSize = 5;
+  pw.MemoryImage? _backgroundImage;
+
+  void _pickImage() async {
+    final html.FileUploadInputElement uploadInput =
+        html.FileUploadInputElement();
+    uploadInput.accept = 'image/*';
+    uploadInput.click();
+
+    uploadInput.onChange.listen((e) {
+      final files = uploadInput.files;
+      if (files!.isNotEmpty) {
+        final reader = html.FileReader();
+        reader.readAsArrayBuffer(files[0]);
+        reader.onLoadEnd.listen((e) {
+          setState(() {
+            _backgroundImage = pw.MemoryImage(reader.result as Uint8List);
+          });
+        });
+      }
+    });
+  }
 
   void _submitData() {
     final bingoEntries = _bingoEntriesController.text.split('\n');
@@ -32,6 +57,7 @@ class _CollectDataViewState extends State<CollectDataView> {
           description: description,
           bingosPerPage: bingosPerPage,
           bingoCount: bingoCount,
+          backgroundImage: _backgroundImage,
         ));
   }
 
@@ -82,6 +108,10 @@ class _CollectDataViewState extends State<CollectDataView> {
                 controller: _bingoCountController,
                 decoration: const InputDecoration(labelText: 'Bingo Count'),
                 keyboardType: TextInputType.number,
+              ),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Pick Background Image'),
               ),
               ElevatedButton(
                 onPressed: _submitData,

@@ -7,6 +7,7 @@ class BingoState {
   final String description;
   final int bingosPerPage;
   final int bingoCount;
+  final pw.MemoryImage? backgroundImage;
 
   BingoState({
     required this.bingoEntries,
@@ -15,5 +16,6 @@ class BingoState {
     required this.description,
     required this.bingosPerPage,
     required this.bingoCount,
+    this.backgroundImage,
   });
 }

@@ -24,6 +24,7 @@ class DataPreviewView extends StatelessWidget {
                       title: state.title,
                       entries: state.bingoEntries,
                       gridSize: state.gridSize,
+                      backgroundImage: state.backgroundImage,
                     );
                     final pdf = await pdfGenerator.generatePdf();
                     return pdf.save();

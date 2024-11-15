@@ -18,7 +18,7 @@ class _CollectDataViewState extends State<CollectDataView> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _bingoCountController = TextEditingController(text: '1');
-  int bingosPerPage = 1;
+  int bingosPerPage = 2;
   int gridSize = 5;
   pw.MemoryImage? backgroundImage;
 
@@ -87,16 +87,24 @@ class _CollectDataViewState extends State<CollectDataView> {
                 minLines: 5,
                 keyboardType: TextInputType.multiline,
               ),
-              DropdownButton<int>(
-                value: gridSize,
-                onChanged: (value) {
-                  setState(() {
-                    gridSize = value!;
-                  });
-                },
-                items: const [
-                  DropdownMenuItem(value: 4, child: Text('4x4')),
-                  DropdownMenuItem(value: 5, child: Text('5x5')),
+              Row(
+                children: [
+                  Text(
+                    'Grid Size: ',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  DropdownButton<int>(
+                    value: gridSize,
+                    onChanged: (value) {
+                      setState(() {
+                        gridSize = value!;
+                      });
+                    },
+                    items: const [
+                      DropdownMenuItem(value: 4, child: Text('4x4')),
+                      DropdownMenuItem(value: 5, child: Text('5x5')),
+                    ],
+                  ),
                 ],
               ),
               TextField(
@@ -107,18 +115,27 @@ class _CollectDataViewState extends State<CollectDataView> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
               ),
-              DropdownButton<int>(
-                onChanged: (value) {
-                  setState(() {
-                    bingosPerPage = value ?? 1;
-                  });
-                },
-                items: const [
-                  DropdownMenuItem(value: 1, child: Text('1')),
-                  DropdownMenuItem(value: 2, child: Text('2')),
-                  DropdownMenuItem(value: 4, child: Text('4')),
-                  DropdownMenuItem(value: 8, child: Text('8')),
-                  DropdownMenuItem(value: 16, child: Text('16')),
+              Row(
+                children: [
+                  Text(
+                    'Bingos per Page: ',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  DropdownButton<int>(
+                    value: bingosPerPage,
+                    onChanged: (value) {
+                      setState(() {
+                        bingosPerPage = value ?? 1;
+                      });
+                    },
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text('1')),
+                      DropdownMenuItem(value: 2, child: Text('2')),
+                      DropdownMenuItem(value: 4, child: Text('4')),
+                      DropdownMenuItem(value: 8, child: Text('8')),
+                      DropdownMenuItem(value: 16, child: Text('16')),
+                    ],
+                  ),
                 ],
               ),
               TextField(

@@ -24,6 +24,8 @@ class BingoBloc extends Bloc<BingoEvent, BingoState> {
         bingosPerPage: event.bingosPerPage,
         bingoCount: event.bingoCount,
         backgroundImage: event.backgroundImage,
+        backsideImage: event.backsideImage,
+        backsideText: event.backsideText,
       ));
     });
   }

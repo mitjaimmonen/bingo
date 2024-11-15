@@ -11,6 +11,8 @@ class SubmitBingoData extends BingoEvent {
   final int bingosPerPage;
   final int bingoCount;
   final pw.MemoryImage? backgroundImage;
+  final pw.MemoryImage? backsideImage;
+  final String? backsideText;
 
   SubmitBingoData({
     required this.bingoEntries,
@@ -20,5 +22,7 @@ class SubmitBingoData extends BingoEvent {
     required this.bingosPerPage,
     required this.bingoCount,
     this.backgroundImage,
+    this.backsideImage,
+    this.backsideText,
   });
 }

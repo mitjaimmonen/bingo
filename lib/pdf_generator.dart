@@ -12,6 +12,9 @@ class PdfGenerator {
   final int bingoCount;
   final pw.MemoryImage? backgroundImage;
 
+  final String? backsideText;
+  final pw.MemoryImage? backsideImage;
+
   PdfGenerator({
     required this.entries,
     this.gridSize = 5,
@@ -20,6 +23,8 @@ class PdfGenerator {
     required this.bingosPerPage,
     required this.bingoCount,
     this.backgroundImage,
+    this.backsideText,
+    this.backsideImage,
   });
 
   Future<pw.Document> generatePdf() async {
@@ -32,6 +37,7 @@ class PdfGenerator {
     final cols = (bingosPerPage / rows).ceil();
 
     for (int i = 0; i < pages; i++) {
+      // front side
       pdf.addPage(
         pw.Page(
           margin: const pw.EdgeInsets.all(0),
@@ -58,6 +64,48 @@ class PdfGenerator {
           },
         ),
       );
+
+      if (backsideText != null || backsideImage != null) {
+        // back side
+        pdf.addPage(
+          pw.Page(
+            margin: const pw.EdgeInsets.all(0),
+            pageFormat: pageFormat,
+            build: (context) {
+              return pw.GridView(
+                crossAxisCount: cols,
+                children: List.generate(
+                  bingosPerPage,
+                  (index) {
+                    return pw.Stack(
+                      children: [
+                        if (backsideImage != null)
+                          pw.Positioned.fill(
+                            child: pw.Image(
+                              backsideImage!,
+                              fit: pw.BoxFit.cover,
+                            ),
+                          ),
+                        pw.Center(
+                          child: pw.Text(
+                            backsideText!,
+                            style: pw.TextStyle(
+                              fontSize: 48 / sqrt(bingosPerPage),
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.red800,
+                            ),
+                            textAlign: pw.TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      }
     }
 
     return pdf;
@@ -125,7 +173,7 @@ class PdfGenerator {
           ),
         pw.Column(
           children: [
-            pw.SizedBox(height: 32 / (rows ?? 1)),
+            pw.SizedBox(height: 96 / (rows ?? 1)),
             if (title != null)
               pw.Text(
                 title,

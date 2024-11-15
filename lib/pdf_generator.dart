@@ -50,6 +50,8 @@ class PdfGenerator {
                   backgroundImage: backgroundImage,
                   title: title,
                   description: description,
+                  rows: rows,
+                  cols: cols,
                 );
               }),
             );
@@ -82,6 +84,8 @@ class PdfGenerator {
     pw.MemoryImage? backgroundImage,
     String? title,
     String? description,
+    int? rows,
+    int? cols,
   }) {
     final table = pw.Table(
       tableWidth: pw.TableWidth.min,
@@ -118,18 +122,19 @@ class PdfGenerator {
           ),
         pw.Column(
           children: [
-            pw.SizedBox(height: 16),
+            pw.SizedBox(height: 32 / (rows ?? 1)),
             if (title != null)
               pw.Text(
                 title,
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                    fontSize: 48 / bingosPerPage,
+                    fontWeight: pw.FontWeight.bold),
                 textAlign: pw.TextAlign.center,
               ),
             if (description != null)
               pw.Text(
                 description,
-                style: const pw.TextStyle(fontSize: 16),
+                style: pw.TextStyle(fontSize: 24 / bingosPerPage),
                 textAlign: pw.TextAlign.center,
               ),
             pw.Expanded(
@@ -137,7 +142,7 @@ class PdfGenerator {
               alignment: pw.Alignment.bottomCenter,
               child: table,
             )),
-            pw.SizedBox(height: 16),
+            pw.SizedBox(height: 96 / (rows ?? 1)),
           ],
         ),
       ],

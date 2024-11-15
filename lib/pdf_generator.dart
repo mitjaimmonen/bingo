@@ -89,7 +89,10 @@ class PdfGenerator {
   }) {
     final table = pw.Table(
       tableWidth: pw.TableWidth.min,
-      border: pw.TableBorder.all(),
+      border: pw.TableBorder.all(
+        color: PdfColors.green800,
+        width: 4 / sqrt(bingosPerPage),
+      ),
       children: List.generate(
         gridSize,
         (row) {
@@ -127,14 +130,19 @@ class PdfGenerator {
               pw.Text(
                 title,
                 style: pw.TextStyle(
-                    fontSize: 48 / bingosPerPage,
-                    fontWeight: pw.FontWeight.bold),
+                  fontSize: 48 / sqrt(bingosPerPage),
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red800,
+                ),
                 textAlign: pw.TextAlign.center,
               ),
             if (description != null)
               pw.Text(
                 description,
-                style: pw.TextStyle(fontSize: 24 / bingosPerPage),
+                style: pw.TextStyle(
+                  fontSize: 24 / sqrt(bingosPerPage),
+                  color: PdfColors.red800,
+                ),
                 textAlign: pw.TextAlign.center,
               ),
             pw.Expanded(

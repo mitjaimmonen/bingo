@@ -150,7 +150,7 @@ class PdfGenerator {
           ),
         pw.Column(
           children: [
-            pw.SizedBox(height: 96 / rows),
+            pw.SizedBox(height: 96 / bingosPerPageSqrt),
             pw.Text(
               pdfData.title,
               style: pw.TextStyle(
@@ -160,6 +160,7 @@ class PdfGenerator {
               ),
               textAlign: pw.TextAlign.center,
             ),
+            pw.SizedBox(height: 24 / bingosPerPageSqrt),
             pw.Text(
               pdfData.description,
               style: pw.TextStyle(
@@ -173,7 +174,7 @@ class PdfGenerator {
               alignment: pw.Alignment.bottomCenter,
               child: table,
             )),
-            pw.SizedBox(height: 96 / rows),
+            pw.SizedBox(height: 96 / bingosPerPageSqrt),
           ],
         ),
       ],

@@ -1,40 +1,29 @@
 import 'dart:math';
 
+import 'package:bingo/bloc/pdf_data.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 class PdfGenerator {
-  final List<String> entries;
-  final int gridSize;
-  final String title;
-  final String description;
-  final int bingosPerPage;
-  final int bingoCount;
-  final pw.MemoryImage? backgroundImage;
+  final PdfData pdfData;
 
-  final String? backsideText;
-  final pw.MemoryImage? backsideImage;
+  final int rows;
+  final int cols;
+  final double bingosPerPageSqrt;
 
   PdfGenerator({
-    required this.entries,
-    this.gridSize = 5,
-    required this.title,
-    required this.description,
-    required this.bingosPerPage,
-    required this.bingoCount,
-    this.backgroundImage,
-    this.backsideText,
-    this.backsideImage,
-  });
+    required this.pdfData,
+  })  : rows = sqrt(pdfData.bingosPerPage).toInt(),
+        cols = (pdfData.bingosPerPage / sqrt(pdfData.bingosPerPage).toInt())
+            .ceil(),
+        bingosPerPageSqrt = sqrt(pdfData.bingosPerPage);
 
   Future<pw.Document> generatePdf() async {
     final pdf = pw.Document();
     final random = Random();
 
-    final pageFormat = _getPageFormat(bingosPerPage);
-    final pages = (bingoCount / bingosPerPage).ceil();
-    final rows = sqrt(bingosPerPage).toInt();
-    final cols = (bingosPerPage / rows).ceil();
+    final pageFormat = _getPageFormat();
+    final pages = (pdfData.bingoCount / pdfData.bingosPerPage).ceil();
 
     for (int i = 0; i < pages; i++) {
       // front side
@@ -45,19 +34,13 @@ class PdfGenerator {
           build: (context) {
             return pw.GridView(
               crossAxisCount: cols,
-              children: List.generate(bingosPerPage, (index) {
-                final shuffledEntries = List<String>.from(entries)
+              children: List.generate(pdfData.bingosPerPage, (index) {
+                final shuffledEntries = List<String>.from(pdfData.bingoEntries)
                   ..shuffle(random);
 
                 return _buildBingo(
                   context,
                   shuffledEntries,
-                  bingosPerPage,
-                  backgroundImage: backgroundImage,
-                  title: title,
-                  description: description,
-                  rows: rows,
-                  cols: cols,
                 );
               }),
             );
@@ -65,7 +48,7 @@ class PdfGenerator {
         ),
       );
 
-      if (backsideText != null || backsideImage != null) {
+      if (pdfData.backsideText != null || pdfData.backsideImage != null) {
         // back side
         pdf.addPage(
           pw.Page(
@@ -75,24 +58,24 @@ class PdfGenerator {
               return pw.GridView(
                 crossAxisCount: cols,
                 children: List.generate(
-                  bingosPerPage,
+                  pdfData.bingosPerPage,
                   (index) {
                     return pw.Stack(
                       children: [
-                        if (backsideImage != null)
+                        if (pdfData.backsideImage != null)
                           pw.Positioned.fill(
                             child: pw.Image(
-                              backsideImage!,
+                              pdfData.backsideImage!,
                               fit: pw.BoxFit.cover,
                             ),
                           ),
                         pw.Center(
                           child: pw.Text(
-                            backsideText!,
+                            pdfData.backsideText!,
                             style: pw.TextStyle(
-                              fontSize: 48 / sqrt(bingosPerPage),
+                              fontSize: 48 / bingosPerPageSqrt,
                               fontWeight: pw.FontWeight.bold,
-                              color: PdfColors.red800,
+                              color: pdfData.backsideTextColor,
                             ),
                             textAlign: pw.TextAlign.center,
                           ),
@@ -111,8 +94,8 @@ class PdfGenerator {
     return pdf;
   }
 
-  PdfPageFormat _getPageFormat(int bingosPerPage) {
-    switch (bingosPerPage) {
+  PdfPageFormat _getPageFormat() {
+    switch (pdfData.bingosPerPage) {
       case 1:
       case 4:
       case 16:
@@ -128,28 +111,22 @@ class PdfGenerator {
   pw.Widget _buildBingo(
     pw.Context context,
     List<String> entries,
-    int bingosPerPage, {
-    pw.MemoryImage? backgroundImage,
-    String? title,
-    String? description,
-    int? rows,
-    int? cols,
-  }) {
+  ) {
     final table = pw.Table(
       tableWidth: pw.TableWidth.min,
       border: pw.TableBorder.all(
         color: PdfColors.green800,
-        width: 4 / sqrt(bingosPerPage),
+        width: 4 / bingosPerPageSqrt,
       ),
       children: List.generate(
-        gridSize,
+        pdfData.gridSize,
         (row) {
           return pw.TableRow(
-            children: List.generate(gridSize, (col) {
-              final index = row * gridSize + col;
+            children: List.generate(pdfData.gridSize, (col) {
+              final index = row * pdfData.gridSize + col;
               return pw.Container(
-                width: 80 / sqrt(bingosPerPage),
-                height: 80 / sqrt(bingosPerPage),
+                width: 80 / bingosPerPageSqrt,
+                height: 80 / bingosPerPageSqrt,
                 alignment: pw.Alignment.center,
                 child: pw.Text(
                   index < entries.length ? entries[index] : '',
@@ -164,41 +141,39 @@ class PdfGenerator {
 
     return pw.Stack(
       children: [
-        if (backgroundImage != null)
+        if (pdfData.backgroundImage != null)
           pw.Positioned.fill(
             child: pw.Image(
-              backgroundImage,
+              pdfData.backgroundImage!,
               fit: pw.BoxFit.cover,
             ),
           ),
         pw.Column(
           children: [
-            pw.SizedBox(height: 96 / (rows ?? 1)),
-            if (title != null)
-              pw.Text(
-                title,
-                style: pw.TextStyle(
-                  fontSize: 48 / sqrt(bingosPerPage),
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.red800,
-                ),
-                textAlign: pw.TextAlign.center,
+            pw.SizedBox(height: 96 / rows),
+            pw.Text(
+              pdfData.title,
+              style: pw.TextStyle(
+                fontSize: 48 / bingosPerPageSqrt,
+                fontWeight: pw.FontWeight.bold,
+                color: pdfData.titleColor,
               ),
-            if (description != null)
-              pw.Text(
-                description,
-                style: pw.TextStyle(
-                  fontSize: 24 / sqrt(bingosPerPage),
-                  color: PdfColors.red800,
-                ),
-                textAlign: pw.TextAlign.center,
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              pdfData.description,
+              style: pw.TextStyle(
+                fontSize: 24 / bingosPerPageSqrt,
+                color: pdfData.descriptionColor,
               ),
+              textAlign: pw.TextAlign.center,
+            ),
             pw.Expanded(
                 child: pw.Align(
               alignment: pw.Alignment.bottomCenter,
               child: table,
             )),
-            pw.SizedBox(height: 96 / (rows ?? 1)),
+            pw.SizedBox(height: 96 / rows),
           ],
         ),
       ],

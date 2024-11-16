@@ -18,15 +18,7 @@ class DataPreviewView extends StatelessWidget {
                 child: PdfPreview(
                   build: (format) async {
                     final pdfGenerator = PdfGenerator(
-                      bingoCount: state.bingoCount,
-                      bingosPerPage: state.bingosPerPage,
-                      description: state.description,
-                      title: state.title,
-                      entries: state.bingoEntries,
-                      gridSize: state.gridSize,
-                      backgroundImage: state.backgroundImage,
-                      backsideText: state.backsideText,
-                      backsideImage: state.backsideImage,
+                      pdfData: state.pdfData,
                     );
                     final pdf = await pdfGenerator.generatePdf();
                     return pdf.save();

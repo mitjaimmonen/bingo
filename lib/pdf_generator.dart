@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bingo/bloc/pdf_data.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -25,6 +26,17 @@ class PdfGenerator {
     final pageFormat = _getPageFormat();
     final pages = (pdfData.bingoCount / pdfData.bingosPerPage).ceil();
 
+    final fancyFontData =
+        await rootBundle.load('assets/fonts/Parisienne/Parisienne-Regular.ttf');
+    final plainFontData = await rootBundle
+        .load('assets/fonts/Host_Grotesk/static/HostGrotesk-Regular.ttf');
+    final plainFontItalicData = await rootBundle
+        .load('assets/fonts/Host_Grotesk/static/HostGrotesk-LightItalic.ttf');
+
+    final fancyFont = pw.Font.ttf(fancyFontData);
+    final plainFont = pw.Font.ttf(plainFontData);
+    final plainFontItalic = pw.Font.ttf(plainFontItalicData);
+
     for (int i = 0; i < pages; i++) {
       // front side
       pdf.addPage(
@@ -41,6 +53,9 @@ class PdfGenerator {
                 return _buildBingo(
                   context,
                   shuffledEntries,
+                  fancyFont,
+                  plainFont,
+                  plainFontItalic,
                 );
               }),
             );
@@ -73,6 +88,8 @@ class PdfGenerator {
                           child: pw.Text(
                             pdfData.backsideText!,
                             style: pw.TextStyle(
+                              font:
+                                  pdfData.fancyBackside ? fancyFont : plainFont,
                               fontSize: 48 / bingosPerPageSqrt,
                               fontWeight: pw.FontWeight.bold,
                               color: pdfData.backsideTextColor,
@@ -111,11 +128,14 @@ class PdfGenerator {
   pw.Widget _buildBingo(
     pw.Context context,
     List<String> entries,
+    pw.Font fancyFont,
+    pw.Font plainFont,
+    pw.Font plainFontItalic,
   ) {
     final table = pw.Table(
       tableWidth: pw.TableWidth.min,
       border: pw.TableBorder.all(
-        color: PdfColors.green800,
+        color: pdfData.gridColor,
         width: 4 / bingosPerPageSqrt,
       ),
       children: List.generate(
@@ -124,14 +144,39 @@ class PdfGenerator {
           return pw.TableRow(
             children: List.generate(pdfData.gridSize, (col) {
               final index = row * pdfData.gridSize + col;
+              final replaceWithJoker = pdfData.jokerImage != null &&
+                  pdfData.middleJoker &&
+                  pdfData.gridSize == 5 &&
+                  index == 12;
+
               return pw.Container(
                 width: 80 / bingosPerPageSqrt,
                 height: 80 / bingosPerPageSqrt,
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  index < entries.length ? entries[index] : '',
-                  textAlign: pw.TextAlign.center,
+                constraints: pw.BoxConstraints(
+                  minWidth: 80 / bingosPerPageSqrt,
+                  minHeight: 80 / bingosPerPageSqrt,
                 ),
+                alignment: pw.Alignment.center,
+                padding: pw.EdgeInsets.all(4 / bingosPerPageSqrt),
+                child: replaceWithJoker
+                    ? pw.FittedBox(
+                        fit: pw.BoxFit.contain,
+                        child: pw.Image(
+                          pdfData.jokerImage!,
+                          width: 76 / bingosPerPageSqrt,
+                          height: 76 / bingosPerPageSqrt,
+                        ),
+                      )
+                    : pw.Text(
+                        index < entries.length ? entries[index] : '',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          font: plainFont,
+                          fontSize: 20 / bingosPerPageSqrt,
+                          fontWeight: pw.FontWeight.bold,
+                          color: pdfData.gridTextColor,
+                        ),
+                      ),
               );
             }),
           );
@@ -154,6 +199,7 @@ class PdfGenerator {
             pw.Text(
               pdfData.title,
               style: pw.TextStyle(
+                font: pdfData.fancyTitle ? fancyFont : plainFont,
                 fontSize: 48 / bingosPerPageSqrt,
                 fontWeight: pw.FontWeight.bold,
                 color: pdfData.titleColor,
@@ -164,6 +210,8 @@ class PdfGenerator {
             pw.Text(
               pdfData.description,
               style: pw.TextStyle(
+                fontItalic: plainFontItalic,
+                fontStyle: pw.FontStyle.italic,
                 fontSize: 24 / bingosPerPageSqrt,
                 color: pdfData.descriptionColor,
               ),

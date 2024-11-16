@@ -25,14 +25,21 @@ class _CollectDataViewState extends State<CollectDataView> {
   int bingosPerPage = 2;
   int gridSize = 5;
   pw.MemoryImage? backgroundImage;
+  bool fancyTitle = true;
 
   final _backsideController = TextEditingController();
   pw.MemoryImage? backsideImage;
   bool hasBacksideText = false;
+  bool fancyBackside = true;
+
+  pw.MemoryImage? jokerImage;
+  bool middleJoker = true;
 
   Color titleColor = const Color(0xFF800000);
   Color descriptionColor = const Color(0xFF008000);
   Color backsideTextColor = const Color(0xFFD29292);
+  Color gridColor = const Color(0xFF1C8000);
+  Color gridTextColor = const Color(0xFF1C8000);
 
   void _pickColor(Color currentColor, Function(Color) onColorChanged) {
     showDialog(
@@ -61,7 +68,7 @@ class _CollectDataViewState extends State<CollectDataView> {
     );
   }
 
-  void _pickImage({bool backside = false}) async {
+  void _pickImage(Function(pw.MemoryImage?) onImagePicked) async {
     final html.FileUploadInputElement uploadInput =
         html.FileUploadInputElement();
     uploadInput.accept = 'image/*';
@@ -74,11 +81,7 @@ class _CollectDataViewState extends State<CollectDataView> {
         reader.readAsArrayBuffer(files[0]);
         reader.onLoadEnd.listen((e) {
           setState(() {
-            if (backside) {
-              backsideImage = pw.MemoryImage(reader.result as Uint8List);
-            } else {
-              backgroundImage = pw.MemoryImage(reader.result as Uint8List);
-            }
+            onImagePicked(pw.MemoryImage(reader.result as Uint8List));
           });
         });
       }
@@ -103,10 +106,16 @@ class _CollectDataViewState extends State<CollectDataView> {
               bingoCount: bingoCount,
               backgroundImage: backgroundImage,
               backsideImage: backsideImage,
+              jokerImage: jokerImage,
               backsideText: backsideText,
+              fancyTitle: fancyTitle,
               titleColor: PdfColor.fromInt(titleColor.value),
               descriptionColor: PdfColor.fromInt(descriptionColor.value),
               backsideTextColor: PdfColor.fromInt(backsideTextColor.value),
+              gridColor: PdfColor.fromInt(gridColor.value),
+              gridTextColor: PdfColor.fromInt(gridTextColor.value),
+              fancyBackside: fancyBackside,
+              middleJoker: middleJoker,
             ),
           ),
         );
@@ -121,14 +130,34 @@ class _CollectDataViewState extends State<CollectDataView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              TextField(
-                controller: _bingoEntriesController,
-                decoration: const InputDecoration(
-                  labelText: 'Bingo Entries (line break separated)',
-                ),
-                maxLines: 10,
-                minLines: 5,
-                keyboardType: TextInputType.multiline,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bingoEntriesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Bingo Entries (line break separated)',
+                      ),
+                      maxLines: 10,
+                      minLines: 5,
+                      keyboardType: TextInputType.multiline,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: gridTextColor,
+                      foregroundColor: gridTextColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                    onPressed: () => _pickColor(gridTextColor, (color) {
+                      setState(() {
+                        gridTextColor = color;
+                      });
+                    }),
+                    child: const Text('Pick Color'),
+                  ),
+                ],
               ),
               Row(
                 children: [
@@ -148,15 +177,62 @@ class _CollectDataViewState extends State<CollectDataView> {
                       DropdownMenuItem(value: 5, child: Text('5x5')),
                     ],
                   ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: gridColor,
+                      foregroundColor: gridColor.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                    onPressed: () => _pickColor(gridColor, (color) {
+                      setState(() {
+                        gridColor = color;
+                      });
+                    }),
+                    child: const Text('Pick Color'),
+                  ),
                 ],
               ),
+              if (gridSize == 5)
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _pickImage((image) {
+                        setState(() {
+                          jokerImage = image;
+                        });
+                      }),
+                      child: const Text('Pick Joker Image'),
+                    ),
+                    if (jokerImage != null)
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            jokerImage = null;
+                          });
+                        },
+                        child: const Text('Remove Joker Image'),
+                      ),
+                  ],
+                ),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
+                      maxLines: 2,
                       controller: _titleController,
                       decoration: const InputDecoration(labelText: 'Title'),
+                      keyboardType: TextInputType.multiline,
                     ),
+                  ),
+                  const Text('Fancy Title: '),
+                  Switch(
+                    value: fancyTitle,
+                    onChanged: (value) {
+                      setState(() {
+                        fancyTitle = value;
+                      });
+                    },
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -178,9 +254,11 @@ class _CollectDataViewState extends State<CollectDataView> {
                 children: [
                   Expanded(
                     child: TextField(
+                      maxLines: 2,
                       controller: _descriptionController,
                       decoration:
                           const InputDecoration(labelText: 'Description'),
+                      keyboardType: TextInputType.multiline,
                     ),
                   ),
                   ElevatedButton(
@@ -230,7 +308,11 @@ class _CollectDataViewState extends State<CollectDataView> {
               Row(
                 children: [
                   ElevatedButton(
-                    onPressed: _pickImage,
+                    onPressed: () => _pickImage((image) {
+                      setState(() {
+                        backgroundImage = image;
+                      });
+                    }),
                     child: const Text('Pick Background Image'),
                   ),
                   if (backgroundImage != null)
@@ -259,6 +341,15 @@ class _CollectDataViewState extends State<CollectDataView> {
                           const InputDecoration(labelText: 'Backside Text'),
                     ),
                   ),
+                  const Text('Fancy Backside Text: '),
+                  Switch(
+                    value: fancyBackside,
+                    onChanged: (value) {
+                      setState(() {
+                        fancyBackside = value;
+                      });
+                    },
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: backsideTextColor,
@@ -279,7 +370,11 @@ class _CollectDataViewState extends State<CollectDataView> {
               Row(
                 children: [
                   ElevatedButton(
-                    onPressed: () => _pickImage(backside: true),
+                    onPressed: () => _pickImage((image) {
+                      setState(() {
+                        backsideImage = image;
+                      });
+                    }),
                     child: const Text('Pick Backside Image'),
                   ),
                   if (backsideImage != null)

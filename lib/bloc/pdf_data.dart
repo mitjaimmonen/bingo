@@ -8,12 +8,21 @@ class PdfData {
   final String description;
   final int bingosPerPage;
   final int bingoCount;
+
   final PdfColor titleColor;
   final PdfColor descriptionColor;
-  final PdfColor backsideTextColor;
+  final PdfColor gridColor;
+  final PdfColor gridTextColor;
+
   final pw.MemoryImage? backgroundImage;
+  final pw.MemoryImage? jokerImage;
   final pw.MemoryImage? backsideImage;
   final String? backsideText;
+  final PdfColor backsideTextColor;
+
+  final bool fancyTitle;
+  final bool fancyBackside;
+  final bool middleJoker;
 
   PdfData({
     required this.bingoEntries,
@@ -25,9 +34,15 @@ class PdfData {
     required this.titleColor,
     required this.descriptionColor,
     required this.backsideTextColor,
+    required this.gridColor,
+    required this.gridTextColor,
     this.backgroundImage,
     this.backsideImage,
+    this.jokerImage,
     this.backsideText,
+    this.fancyTitle = true,
+    this.fancyBackside = true,
+    this.middleJoker = false,
   });
 
   factory PdfData.empty() {
@@ -41,6 +56,9 @@ class PdfData {
       titleColor: const PdfColor.fromInt(0xFF000000),
       descriptionColor: const PdfColor.fromInt(0xFF000000),
       backsideTextColor: const PdfColor.fromInt(0xFF000000),
+      gridColor: const PdfColor.fromInt(0xFF000000),
+      gridTextColor: const PdfColor.fromInt(0xFF000000),
+      fancyTitle: true,
     );
   }
 }

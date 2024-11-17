@@ -94,12 +94,14 @@ class MyHomePageState extends State<MyHomePage>
           } else {
             return Row(
               children: [
-                CollectDataView(
-                  openPreview: () {
-                    _tabController.index = 1;
-                  },
+                Expanded(
+                  child: CollectDataView(
+                    openPreview: () {
+                      _tabController.index = 1;
+                    },
+                  ),
                 ),
-                const DataPreviewView(),
+                const Expanded(child: DataPreviewView()),
               ],
             );
           }

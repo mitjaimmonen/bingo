@@ -10,18 +10,18 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 class CollectDataView extends StatefulWidget {
-  const CollectDataView({super.key});
+  final Function openPreview;
+
+  const CollectDataView({
+    super.key,
+    required this.openPreview,
+  });
 
   @override
   State<CollectDataView> createState() => _CollectDataViewState();
 }
 
 class _CollectDataViewState extends State<CollectDataView> {
-  final _bingoEntriesController = TextEditingController();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _bingoCountController = TextEditingController(text: '1');
-
   int bingosPerPage = 2;
   int gridSize = 5;
   pw.MemoryImage? backgroundImage;
@@ -88,11 +88,11 @@ class _CollectDataViewState extends State<CollectDataView> {
     });
   }
 
-  void _submitData() {
-    final bingoEntries = _bingoEntriesController.text.split('\n');
-    final title = _titleController.text;
-    final description = _descriptionController.text;
-    final bingoCount = int.parse(_bingoCountController.text);
+  void _submitData(BingoBloc bloc) {
+    final bingoEntries = bloc.bingoEntriesController.text.split('\n');
+    final title = bloc.titleController.text;
+    final description = bloc.descriptionController.text;
+    final bingoCount = int.parse(bloc.bingoCountController.text);
     final backsideText = hasBacksideText ? _backsideController.text : null;
 
     context.read<BingoBloc>().add(
@@ -123,284 +123,284 @@ class _CollectDataViewState extends State<CollectDataView> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _bingoEntriesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Bingo Entries (line break separated)',
-                      ),
-                      maxLines: 10,
-                      minLines: 5,
-                      keyboardType: TextInputType.multiline,
+    final bloc = context.read<BingoBloc>();
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: bloc.bingoEntriesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Bingo Entries (line break separated)',
                     ),
+                    maxLines: 10,
+                    minLines: 5,
+                    keyboardType: TextInputType.multiline,
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: gridTextColor,
-                      foregroundColor: gridTextColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                    onPressed: () => _pickColor(gridTextColor, (color) {
-                      setState(() {
-                        gridTextColor = color;
-                      });
-                    }),
-                    child: const Text('Pick Color'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: gridTextColor,
+                    foregroundColor: gridTextColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Grid Size: ',
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  DropdownButton<int>(
-                    value: gridSize,
-                    onChanged: (value) {
-                      setState(() {
-                        gridSize = value!;
-                      });
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 4, child: Text('4x4')),
-                      DropdownMenuItem(value: 5, child: Text('5x5')),
-                    ],
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: gridColor,
-                      foregroundColor: gridColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                    onPressed: () => _pickColor(gridColor, (color) {
-                      setState(() {
-                        gridColor = color;
-                      });
-                    }),
-                    child: const Text('Pick Color'),
-                  ),
-                ],
-              ),
-              if (gridSize == 5)
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => _pickImage((image) {
-                        setState(() {
-                          jokerImage = image;
-                        });
-                      }),
-                      child: const Text('Pick Joker Image'),
-                    ),
-                    if (jokerImage != null)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            jokerImage = null;
-                          });
-                        },
-                        child: const Text('Remove Joker Image'),
-                      ),
+                  onPressed: () => _pickColor(gridTextColor, (color) {
+                    setState(() {
+                      gridTextColor = color;
+                    });
+                  }),
+                  child: const Text('Grid Text Color'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'Grid Size: ',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                DropdownButton<int>(
+                  value: gridSize,
+                  onChanged: (value) {
+                    setState(() {
+                      gridSize = value!;
+                    });
+                  },
+                  items: const [
+                    DropdownMenuItem(value: 4, child: Text('4x4')),
+                    DropdownMenuItem(value: 5, child: Text('5x5')),
                   ],
                 ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      maxLines: 2,
-                      controller: _titleController,
-                      decoration: const InputDecoration(labelText: 'Title'),
-                      keyboardType: TextInputType.multiline,
-                    ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: gridColor,
+                    foregroundColor: gridColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
                   ),
-                  const Text('Fancy Title: '),
-                  Switch(
-                    value: fancyTitle,
-                    onChanged: (value) {
-                      setState(() {
-                        fancyTitle = value;
-                      });
-                    },
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: titleColor,
-                      foregroundColor: titleColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                    onPressed: () => _pickColor(titleColor, (color) {
-                      setState(() {
-                        titleColor = color;
-                      });
-                    }),
-                    child: const Text('Pick Color'),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      maxLines: 2,
-                      controller: _descriptionController,
-                      decoration:
-                          const InputDecoration(labelText: 'Description'),
-                      keyboardType: TextInputType.multiline,
-                    ),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: descriptionColor,
-                      foregroundColor: descriptionColor.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                    onPressed: () => _pickColor(descriptionColor, (color) {
-                      setState(() {
-                        descriptionColor = color;
-                      });
-                    }),
-                    child: const Text('Pick Color'),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Bingos per Page: ',
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  DropdownButton<int>(
-                    value: bingosPerPage,
-                    onChanged: (value) {
-                      setState(() {
-                        bingosPerPage = value ?? 1;
-                      });
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('1')),
-                      DropdownMenuItem(value: 2, child: Text('2')),
-                      DropdownMenuItem(value: 4, child: Text('4')),
-                      DropdownMenuItem(value: 8, child: Text('8')),
-                      DropdownMenuItem(value: 16, child: Text('16')),
-                    ],
-                  ),
-                ],
-              ),
-              TextField(
-                controller: _bingoCountController,
-                decoration: const InputDecoration(labelText: 'Bingo Count'),
-                keyboardType: TextInputType.number,
-              ),
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _pickImage((image) {
-                      setState(() {
-                        backgroundImage = image;
-                      });
-                    }),
-                    child: const Text('Pick Background Image'),
-                  ),
-                  if (backgroundImage != null)
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          backgroundImage = null;
-                        });
-                      },
-                      child: const Text('Remove Background Image'),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _backsideController,
-                      onChanged: (value) {
-                        setState(() {
-                          hasBacksideText = value.isNotEmpty;
-                        });
-                      },
-                      decoration:
-                          const InputDecoration(labelText: 'Backside Text'),
-                    ),
-                  ),
-                  const Text('Fancy Backside Text: '),
-                  Switch(
-                    value: fancyBackside,
-                    onChanged: (value) {
-                      setState(() {
-                        fancyBackside = value;
-                      });
-                    },
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: backsideTextColor,
-                      foregroundColor:
-                          backsideTextColor.computeLuminance() > 0.5
-                              ? Colors.black
-                              : Colors.white,
-                    ),
-                    onPressed: () => _pickColor(backsideTextColor, (color) {
-                      setState(() {
-                        backsideTextColor = color;
-                      });
-                    }),
-                    child: const Text('Pick Color'),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _pickImage((image) {
-                      setState(() {
-                        backsideImage = image;
-                      });
-                    }),
-                    child: const Text('Pick Backside Image'),
-                  ),
-                  if (backsideImage != null)
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          backsideImage = null;
-                        });
-                      },
-                      child: const Text('Remove Backside Image'),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              if (backsideImage != null || hasBacksideText)
-                Text(
-                  'Backside is enabled!',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  onPressed: () => _pickColor(gridColor, (color) {
+                    setState(() {
+                      gridColor = color;
+                    });
+                  }),
+                  child: const Text('Grid Color'),
                 ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _submitData,
-                child: const Text('Submit'),
+              ],
+            ),
+            if (gridSize == 5)
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _pickImage((image) {
+                      setState(() {
+                        jokerImage = image;
+                      });
+                    }),
+                    child: const Text('Pick Joker Image'),
+                  ),
+                  if (jokerImage != null)
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          jokerImage = null;
+                        });
+                      },
+                      child: const Text('Remove Joker Image'),
+                    ),
+                ],
               ),
-            ],
-          ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    maxLines: 2,
+                    controller: bloc.titleController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+                const Text('Fancy: '),
+                Switch(
+                  value: fancyTitle,
+                  onChanged: (value) {
+                    setState(() {
+                      fancyTitle = value;
+                    });
+                  },
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: titleColor,
+                    foregroundColor: titleColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  onPressed: () => _pickColor(titleColor, (color) {
+                    setState(() {
+                      titleColor = color;
+                    });
+                  }),
+                  child: const Text('Title Color'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    maxLines: 2,
+                    controller: bloc.descriptionController,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: descriptionColor,
+                    foregroundColor: descriptionColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  onPressed: () => _pickColor(descriptionColor, (color) {
+                    setState(() {
+                      descriptionColor = color;
+                    });
+                  }),
+                  child: const Text('Description Color'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'Bingos per Page: ',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                DropdownButton<int>(
+                  value: bingosPerPage,
+                  onChanged: (value) {
+                    setState(() {
+                      bingosPerPage = value ?? 1;
+                    });
+                  },
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text('1')),
+                    DropdownMenuItem(value: 2, child: Text('2')),
+                    DropdownMenuItem(value: 4, child: Text('4')),
+                    DropdownMenuItem(value: 8, child: Text('8')),
+                    DropdownMenuItem(value: 16, child: Text('16')),
+                  ],
+                ),
+              ],
+            ),
+            TextField(
+              controller: bloc.bingoCountController,
+              decoration: const InputDecoration(labelText: 'Bingo Count'),
+              keyboardType: TextInputType.number,
+            ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => _pickImage((image) {
+                    setState(() {
+                      backgroundImage = image;
+                    });
+                  }),
+                  child: const Text('Pick Background Image'),
+                ),
+                if (backgroundImage != null)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        backgroundImage = null;
+                      });
+                    },
+                    child: const Text('Remove Background Image'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _backsideController,
+                    onChanged: (value) {
+                      setState(() {
+                        hasBacksideText = value.isNotEmpty;
+                      });
+                    },
+                    decoration:
+                        const InputDecoration(labelText: 'Backside Text'),
+                  ),
+                ),
+                const Text('Fancy: '),
+                Switch(
+                  value: fancyBackside,
+                  onChanged: (value) {
+                    setState(() {
+                      fancyBackside = value;
+                    });
+                  },
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: backsideTextColor,
+                    foregroundColor: backsideTextColor.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  onPressed: () => _pickColor(backsideTextColor, (color) {
+                    setState(() {
+                      backsideTextColor = color;
+                    });
+                  }),
+                  child: const Text('Back Text Color'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => _pickImage((image) {
+                    setState(() {
+                      backsideImage = image;
+                    });
+                  }),
+                  child: const Text('Pick Backside Image'),
+                ),
+                if (backsideImage != null)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        backsideImage = null;
+                      });
+                    },
+                    child: const Text('Remove Backside Image'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            if (backsideImage != null || hasBacksideText)
+              Text(
+                'Backside is enabled!',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                _submitData(bloc);
+                widget.openPreview();
+              },
+              child: const Text('Submit'),
+            ),
+          ],
         ),
       ),
     );

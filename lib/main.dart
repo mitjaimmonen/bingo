@@ -27,23 +27,83 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   final String title;
 
   const MyHomePage({super.key, required this.title});
+
+  @override
+  MyHomePageState createState() => MyHomePageState();
+}
+
+class MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
+        title: Text(widget.title),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 1000) {
+                return TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'Collect Data'),
+                    Tab(text: 'Preview Data'),
+                  ],
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
+        ),
       ),
-      body: const Row(
-        children: [
-          CollectDataView(),
-          DataPreviewView(),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 1000) {
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                CollectDataView(
+                  openPreview: () {
+                    _tabController.index = 1;
+                  },
+                ),
+                const DataPreviewView(),
+              ],
+            );
+          } else {
+            return Row(
+              children: [
+                CollectDataView(
+                  openPreview: () {
+                    _tabController.index = 1;
+                  },
+                ),
+                const DataPreviewView(),
+              ],
+            );
+          }
+        },
       ),
     );
   }

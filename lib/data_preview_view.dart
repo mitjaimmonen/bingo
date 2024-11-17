@@ -9,26 +9,24 @@ class DataPreviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: BlocBuilder<BingoBloc, BingoState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              Expanded(
-                child: PdfPreview(
-                  build: (format) async {
-                    final pdfGenerator = PdfGenerator(
-                      pdfData: state.pdfData,
-                    );
-                    final pdf = await pdfGenerator.generatePdf();
-                    return pdf.save();
-                  },
-                ),
+    return BlocBuilder<BingoBloc, BingoState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            Expanded(
+              child: PdfPreview(
+                build: (format) async {
+                  final pdfGenerator = PdfGenerator(
+                    pdfData: state.pdfData,
+                  );
+                  final pdf = await pdfGenerator.generatePdf();
+                  return pdf.save();
+                },
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

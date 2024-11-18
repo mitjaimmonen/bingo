@@ -27,7 +27,6 @@ class _CollectDataViewState extends State<CollectDataView> {
   pw.MemoryImage? backgroundImage;
   bool fancyTitle = true;
 
-  final _backsideController = TextEditingController();
   pw.MemoryImage? backsideImage;
   bool hasBacksideText = false;
   bool fancyBackside = true;
@@ -40,6 +39,24 @@ class _CollectDataViewState extends State<CollectDataView> {
   Color backsideTextColor = const Color(0xFFD29292);
   Color gridColor = const Color(0xFF1C8000);
   Color gridTextColor = const Color(0xFF1C8000);
+
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<BingoBloc>();
+
+    if (bloc.state is BingoLoaded) {
+      bloc.bingoEntriesController.text =
+          (bloc.state as BingoLoaded).pdfData.bingoEntries.join('\n');
+      bloc.titleController.text = (bloc.state as BingoLoaded).pdfData.title;
+      bloc.descriptionController.text =
+          (bloc.state as BingoLoaded).pdfData.description;
+      bloc.bingoCountController.text =
+          (bloc.state as BingoLoaded).pdfData.bingoCount.toString();
+      bloc.backsideController.text =
+          (bloc.state as BingoLoaded).pdfData.backsideText ?? '';
+    }
+  }
 
   void _pickColor(Color currentColor, Function(Color) onColorChanged) {
     showDialog(
@@ -93,7 +110,7 @@ class _CollectDataViewState extends State<CollectDataView> {
     final title = bloc.titleController.text;
     final description = bloc.descriptionController.text;
     final bingoCount = int.parse(bloc.bingoCountController.text);
-    final backsideText = hasBacksideText ? _backsideController.text : null;
+    final backsideText = hasBacksideText ? bloc.backsideController.text : null;
 
     context.read<BingoBloc>().add(
           SubmitBingoData(
@@ -330,7 +347,7 @@ class _CollectDataViewState extends State<CollectDataView> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _backsideController,
+                    controller: bloc.backsideController,
                     onChanged: (value) {
                       setState(() {
                         hasBacksideText = value.isNotEmpty;
@@ -398,7 +415,7 @@ class _CollectDataViewState extends State<CollectDataView> {
                 _submitData(bloc);
                 widget.openPreview();
               },
-              child: const Text('Submit'),
+              child: const Text('Save & Submit'),
             ),
           ],
         ),

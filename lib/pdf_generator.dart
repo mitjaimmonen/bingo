@@ -136,7 +136,7 @@ class PdfGenerator {
       tableWidth: pw.TableWidth.min,
       border: pw.TableBorder.all(
         color: pdfData.gridColor,
-        width: 4 / bingosPerPageSqrt,
+        width: 3 / bingosPerPageSqrt,
       ),
       children: List.generate(
         pdfData.gridSize,
@@ -196,26 +196,38 @@ class PdfGenerator {
         pw.Column(
           children: [
             pw.SizedBox(height: 96 / bingosPerPageSqrt),
-            pw.Text(
-              pdfData.title,
-              style: pw.TextStyle(
-                font: pdfData.fancyTitle ? fancyFont : plainFont,
-                fontSize: 48 / bingosPerPageSqrt,
-                fontWeight: pw.FontWeight.bold,
-                color: pdfData.titleColor,
+            pw.Padding(
+              padding: pw.EdgeInsets.symmetric(
+                horizontal: 16 / bingosPerPageSqrt,
+                vertical: 8 / bingosPerPageSqrt,
               ),
-              textAlign: pw.TextAlign.center,
+              child: pw.Text(
+                pdfData.title,
+                style: pw.TextStyle(
+                  font: pdfData.fancyTitle ? fancyFont : plainFont,
+                  fontSize: 48 / bingosPerPageSqrt,
+                  fontWeight: pw.FontWeight.bold,
+                  color: pdfData.titleColor,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
             ),
             pw.SizedBox(height: 24 / bingosPerPageSqrt),
-            pw.Text(
-              pdfData.description,
-              style: pw.TextStyle(
-                fontItalic: plainFontItalic,
-                fontStyle: pw.FontStyle.italic,
-                fontSize: 24 / bingosPerPageSqrt,
-                color: pdfData.descriptionColor,
+            pw.Padding(
+              padding: pw.EdgeInsets.symmetric(
+                horizontal: 16 / bingosPerPageSqrt,
+                vertical: 8 / bingosPerPageSqrt,
               ),
-              textAlign: pw.TextAlign.center,
+              child: pw.Text(
+                pdfData.description,
+                style: pw.TextStyle(
+                  fontItalic: plainFontItalic,
+                  fontStyle: pw.FontStyle.italic,
+                  fontSize: 24 / bingosPerPageSqrt,
+                  color: pdfData.descriptionColor,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
             ),
             pw.Expanded(
                 child: pw.Align(

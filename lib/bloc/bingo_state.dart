@@ -1,9 +1,13 @@
 part of 'bingo_bloc.dart';
 
-class BingoState {
+abstract class BingoState {}
+
+class BingoInitial extends BingoState {}
+
+class BingoLoaded extends BingoState {
   final PdfData pdfData;
 
-  BingoState({
+  BingoLoaded({
     required this.pdfData,
   });
 }

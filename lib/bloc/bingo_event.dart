@@ -10,3 +10,15 @@ class SubmitBingoData extends BingoEvent {
     required this.pdfData,
   });
 }
+
+class SaveBingoData extends BingoEvent {
+  final PdfData pdfData;
+
+  SaveBingoData({
+    required this.pdfData,
+  });
+}
+
+class LoadBingoData extends BingoEvent {
+  LoadBingoData();
+}

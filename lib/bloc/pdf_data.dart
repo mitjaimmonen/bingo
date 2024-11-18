@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:bingo/color_utility.dart';
+import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -59,6 +63,52 @@ class PdfData {
       gridColor: const PdfColor.fromInt(0xFF000000),
       gridTextColor: const PdfColor.fromInt(0xFF000000),
       fancyTitle: true,
+    );
+  }
+
+  // to json string
+  String toJson() {
+    return jsonEncode({
+      'bingoEntries': bingoEntries,
+      'gridSize': gridSize,
+      'title': title,
+      'description': description,
+      'bingosPerPage': bingosPerPage,
+      'bingoCount': bingoCount,
+      'titleColor': Color(titleColor.toInt()).toHexString(),
+      'descriptionColor': Color(descriptionColor.toInt()).toHexString(),
+      'backsideTextColor': Color(backsideTextColor.toInt()).toHexString(),
+      'gridColor': Color(gridColor.toInt()).toHexString(),
+      'gridTextColor': Color(gridTextColor.toInt()).toHexString(),
+      'fancyTitle': fancyTitle,
+      'fancyBackside': fancyBackside,
+      'middleJoker': middleJoker,
+      'backsideText': backsideText,
+    });
+  }
+
+  // from json
+  factory PdfData.fromJson(String jsonString) {
+    final json = jsonDecode(jsonString);
+    return PdfData(
+      bingoEntries: List<String>.from(json['bingoEntries']),
+      gridSize: json['gridSize'],
+      title: json['title'],
+      description: json['description'],
+      bingosPerPage: json['bingosPerPage'],
+      bingoCount: json['bingoCount'],
+      titleColor: PdfColor.fromInt(HexColor.fromHex(json['titleColor']).value),
+      descriptionColor:
+          PdfColor.fromInt(HexColor.fromHex(json['descriptionColor']).value),
+      backsideTextColor:
+          PdfColor.fromInt(HexColor.fromHex(json['backsideTextColor']).value),
+      gridColor: PdfColor.fromInt(HexColor.fromHex(json['gridColor']).value),
+      gridTextColor:
+          PdfColor.fromInt(HexColor.fromHex(json['gridTextColor']).value),
+      fancyTitle: json['fancyTitle'],
+      fancyBackside: json['fancyBackside'],
+      middleJoker: json['middleJoker'],
+      backsideText: json['backsideText'] ?? '',
     );
   }
 }

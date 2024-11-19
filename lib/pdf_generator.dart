@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:bingo/bloc/pdf_data.dart';
@@ -11,6 +12,7 @@ class PdfGenerator {
   final int rows;
   final int cols;
   final double bingosPerPageSqrt;
+  static const tableSize = 440.0;
 
   PdfGenerator({
     required this.pdfData,
@@ -86,7 +88,7 @@ class PdfGenerator {
                           ),
                         pw.Center(
                           child: pw.Text(
-                            pdfData.backsideText!,
+                            pdfData.backsideText ?? '',
                             style: pw.TextStyle(
                               font:
                                   pdfData.fancyBackside ? fancyFont : plainFont,
@@ -125,6 +127,25 @@ class PdfGenerator {
     }
   }
 
+  double _approximateFontSize(String content, double preferredFontSize) {
+    // Set minimum font size
+    final double minFontSize = (40.0 / pdfData.gridSize) / bingosPerPageSqrt;
+
+    // Base calculation on content length
+    final int contentLength = content.length;
+
+    // Calculate scaling factor based on content length
+    double scalingFactor = 1.0;
+    final scaler = pdfData.gridSize == 5 ? 22 : 40;
+    scalingFactor = scaler / contentLength;
+
+    // Apply scaling to preferred font size
+    double calculatedSize = preferredFontSize * scalingFactor;
+
+    // Ensure font size stays within bounds
+    return math.max(minFontSize, math.min(calculatedSize, preferredFontSize));
+  }
+
   pw.Widget _buildBingo(
     pw.Context context,
     List<String> entries,
@@ -148,35 +169,54 @@ class PdfGenerator {
                   pdfData.middleJoker &&
                   pdfData.gridSize == 5 &&
                   index == 12;
+              final containerSize =
+                  (tableSize / pdfData.gridSize) / bingosPerPageSqrt;
 
               return pw.Container(
-                width: 80 / bingosPerPageSqrt,
-                height: 80 / bingosPerPageSqrt,
+                width: containerSize,
+                height: containerSize,
                 constraints: pw.BoxConstraints(
-                  minWidth: 80 / bingosPerPageSqrt,
-                  minHeight: 80 / bingosPerPageSqrt,
+                  minWidth: containerSize,
+                  minHeight: containerSize,
                 ),
                 alignment: pw.Alignment.center,
-                padding: pw.EdgeInsets.all(4 / bingosPerPageSqrt),
-                child: replaceWithJoker
-                    ? pw.FittedBox(
-                        fit: pw.BoxFit.contain,
-                        child: pw.Image(
-                          pdfData.jokerImage!,
-                          width: 76 / bingosPerPageSqrt,
-                          height: 76 / bingosPerPageSqrt,
-                        ),
-                      )
-                    : pw.Text(
-                        index < entries.length ? entries[index] : '',
-                        textAlign: pw.TextAlign.center,
-                        style: pw.TextStyle(
-                          font: plainFont,
-                          fontSize: 20 / bingosPerPageSqrt,
-                          fontWeight: pw.FontWeight.bold,
-                          color: pdfData.gridTextColor,
-                        ),
+                child: pw.Stack(
+                  children: [
+                    pw.Opacity(
+                      opacity: 0.75,
+                      child: pw.Container(color: const PdfColor(1, 1, 1)),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(4 / bingosPerPageSqrt),
+                      child: pw.Center(
+                        child: replaceWithJoker
+                            ? pw.FittedBox(
+                                fit: pw.BoxFit.contain,
+                                child: pw.Image(
+                                  pdfData.jokerImage!,
+                                  width: 76 / bingosPerPageSqrt,
+                                  height: 76 / bingosPerPageSqrt,
+                                ),
+                              )
+                            : pw.Text(
+                                index < entries.length ? entries[index] : '',
+                                textAlign: pw.TextAlign.center,
+                                style: pw.TextStyle(
+                                  font: plainFont,
+                                  fontSize: _approximateFontSize(
+                                    index < entries.length
+                                        ? entries[index]
+                                        : '',
+                                    18 / bingosPerPageSqrt,
+                                  ),
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: pdfData.gridTextColor,
+                                ),
+                              ),
                       ),
+                    ),
+                  ],
+                ),
               );
             }),
           );
@@ -195,38 +235,46 @@ class PdfGenerator {
           ),
         pw.Column(
           children: [
-            pw.SizedBox(height: 96 / bingosPerPageSqrt),
-            pw.Padding(
-              padding: pw.EdgeInsets.symmetric(
-                horizontal: 16 / bingosPerPageSqrt,
-                vertical: 8 / bingosPerPageSqrt,
+            pw.SizedBox(height: 64 / bingosPerPageSqrt),
+            pw.ConstrainedBox(
+              constraints: pw.BoxConstraints(
+                maxWidth: tableSize / bingosPerPageSqrt,
               ),
-              child: pw.Text(
-                pdfData.title,
-                style: pw.TextStyle(
-                  font: pdfData.fancyTitle ? fancyFont : plainFont,
-                  fontSize: 48 / bingosPerPageSqrt,
-                  fontWeight: pw.FontWeight.bold,
-                  color: pdfData.titleColor,
+              child: pw.Padding(
+                padding: pw.EdgeInsets.symmetric(
+                  vertical: 8 / bingosPerPageSqrt,
                 ),
-                textAlign: pw.TextAlign.center,
+                child: pw.Text(
+                  pdfData.title,
+                  style: pw.TextStyle(
+                    font: pdfData.fancyTitle ? fancyFont : plainFont,
+                    fontSize: 48 / bingosPerPageSqrt,
+                    fontWeight: pw.FontWeight.bold,
+                    color: pdfData.titleColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
               ),
             ),
-            pw.SizedBox(height: 24 / bingosPerPageSqrt),
-            pw.Padding(
-              padding: pw.EdgeInsets.symmetric(
-                horizontal: 16 / bingosPerPageSqrt,
-                vertical: 8 / bingosPerPageSqrt,
+            pw.SizedBox(height: 12 / bingosPerPageSqrt),
+            pw.ConstrainedBox(
+              constraints: pw.BoxConstraints(
+                maxWidth: tableSize / bingosPerPageSqrt,
               ),
-              child: pw.Text(
-                pdfData.description,
-                style: pw.TextStyle(
-                  fontItalic: plainFontItalic,
-                  fontStyle: pw.FontStyle.italic,
-                  fontSize: 24 / bingosPerPageSqrt,
-                  color: pdfData.descriptionColor,
+              child: pw.Padding(
+                padding: pw.EdgeInsets.symmetric(
+                  vertical: 8 / bingosPerPageSqrt,
                 ),
-                textAlign: pw.TextAlign.center,
+                child: pw.Text(
+                  pdfData.description,
+                  style: pw.TextStyle(
+                    fontItalic: plainFontItalic,
+                    fontStyle: pw.FontStyle.italic,
+                    fontSize: 24 / bingosPerPageSqrt,
+                    color: pdfData.descriptionColor,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
               ),
             ),
             pw.Expanded(
@@ -234,7 +282,7 @@ class PdfGenerator {
               alignment: pw.Alignment.bottomCenter,
               child: table,
             )),
-            pw.SizedBox(height: 96 / bingosPerPageSqrt),
+            pw.SizedBox(height: 80 / bingosPerPageSqrt),
           ],
         ),
       ],

@@ -55,6 +55,17 @@ class _CollectDataViewState extends State<CollectDataView> {
           (bloc.state as BingoLoaded).pdfData.bingoCount.toString();
       bloc.backsideController.text =
           (bloc.state as BingoLoaded).pdfData.backsideText ?? '';
+      gridSize = (bloc.state as BingoLoaded).pdfData.gridSize;
+      bingosPerPage = (bloc.state as BingoLoaded).pdfData.bingosPerPage;
+      titleColor =
+          Color((bloc.state as BingoLoaded).pdfData.titleColor.toInt());
+      descriptionColor =
+          Color((bloc.state as BingoLoaded).pdfData.descriptionColor.toInt());
+      backsideTextColor =
+          Color((bloc.state as BingoLoaded).pdfData.backsideTextColor.toInt());
+      gridColor = Color((bloc.state as BingoLoaded).pdfData.gridColor.toInt());
+      gridTextColor =
+          Color((bloc.state as BingoLoaded).pdfData.gridTextColor.toInt());
     }
   }
 

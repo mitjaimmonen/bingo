@@ -5,7 +5,8 @@ This project is a simple Flutter application that generates custom bingo PDF fil
 - Custom grid sizes
 - Multiple bingos per page
 - Customizable colors and fonts
-- Optional joker fields
+- Optional joker field with custom image
+- Custom background images
 - Back side printing support
 
 Built as a weekend project, it prioritizes functionality over code elegance, but successfully delivers on its core purpose of free bingo card generation.

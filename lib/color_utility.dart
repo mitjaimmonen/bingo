@@ -9,7 +9,7 @@ extension HexColor on Color {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
-  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
+  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `false`).
   String toHexString({bool leadingHashSign = false}) =>
       '${leadingHashSign ? '#' : ''}'
       '${(a * 255).toInt().toRadixString(16).padLeft(2, '0')}'
@@ -17,6 +17,8 @@ extension HexColor on Color {
       '${(g * 255).toInt().toRadixString(16).padLeft(2, '0')}'
       '${(b * 255).toInt().toRadixString(16).padLeft(2, '0')}';
 
+  // This is used because flutter deprecated using Color.value
+  /// Returns the int value of the color
   int toInt() {
     return int.parse(toHexString(), radix: 16);
   }

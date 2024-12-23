@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:bingo/color_utility.dart';
-import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -66,7 +64,6 @@ class PdfData {
     );
   }
 
-  // to json string
   String toJson() {
     return jsonEncode({
       'bingoEntries': bingoEntries,
@@ -75,11 +72,11 @@ class PdfData {
       'description': description,
       'bingosPerPage': bingosPerPage,
       'bingoCount': bingoCount,
-      'titleColor': Color(titleColor.toInt()).toHexString(),
-      'descriptionColor': Color(descriptionColor.toInt()).toHexString(),
-      'backsideTextColor': Color(backsideTextColor.toInt()).toHexString(),
-      'gridColor': Color(gridColor.toInt()).toHexString(),
-      'gridTextColor': Color(gridTextColor.toInt()).toHexString(),
+      'titleColor': titleColor.toInt(),
+      'descriptionColor': descriptionColor.toInt(),
+      'backsideTextColor': backsideTextColor.toInt(),
+      'gridColor': gridColor.toInt(),
+      'gridTextColor': gridTextColor.toInt(),
       'fancyTitle': fancyTitle,
       'fancyBackside': fancyBackside,
       'middleJoker': middleJoker,
@@ -87,7 +84,6 @@ class PdfData {
     });
   }
 
-  // from json
   factory PdfData.fromJson(String jsonString) {
     final json = jsonDecode(jsonString);
     return PdfData(
@@ -97,14 +93,14 @@ class PdfData {
       description: json['description'],
       bingosPerPage: json['bingosPerPage'],
       bingoCount: json['bingoCount'],
-      titleColor: PdfColor.fromInt(int.parse(json['titleColor'], radix: 16)),
+      titleColor: PdfColor.fromInt(json['titleColor']),
       descriptionColor:
-          PdfColor.fromInt(int.parse(json['descriptionColor'], radix: 16)),
+          PdfColor.fromInt(json['descriptionColor']),
       backsideTextColor:
-          PdfColor.fromInt(int.parse(json['backsideTextColor'], radix: 16)),
-      gridColor: PdfColor.fromInt(int.parse(json['gridColor'], radix: 16)),
+          PdfColor.fromInt(json['backsideTextColor']),
+      gridColor: PdfColor.fromInt(json['gridColor']),
       gridTextColor:
-          PdfColor.fromInt(int.parse(json['gridTextColor'], radix: 16)),
+          PdfColor.fromInt(json['gridTextColor']),
       fancyTitle: json['fancyTitle'],
       fancyBackside: json['fancyBackside'],
       middleJoker: json['middleJoker'],

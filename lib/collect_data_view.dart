@@ -1,6 +1,5 @@
 import 'package:bingo/bloc/bingo_bloc.dart';
 import 'package:bingo/bloc/pdf_data.dart';
-import 'package:bingo/color_utility.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
@@ -128,11 +127,11 @@ class _CollectDataViewState extends State<CollectDataView> {
               jokerImage: jokerImage,
               backsideText: backsideText,
               fancyTitle: fancyTitle,
-              titleColor: PdfColor.fromInt(titleColor.toInt()),
-              descriptionColor: PdfColor.fromInt(descriptionColor.toInt()),
-              backsideTextColor: PdfColor.fromInt(backsideTextColor.toInt()),
-              gridColor: PdfColor.fromInt(gridColor.toInt()),
-              gridTextColor: PdfColor.fromInt(gridTextColor.toInt()),
+              titleColor: PdfColor.fromHex(titleColor.hex),
+              descriptionColor: PdfColor.fromHex(descriptionColor.hex),
+              backsideTextColor: PdfColor.fromHex(backsideTextColor.hex),
+              gridColor: PdfColor.fromHex(gridColor.hex),
+              gridTextColor: PdfColor.fromHex(gridTextColor.hex),
               fancyBackside: fancyBackside,
               middleJoker: middleJoker,
             ),

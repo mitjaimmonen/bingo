@@ -1,9 +1,8 @@
-import 'dart:html' as html;
-
 import 'package:bingo/bloc/bingo_bloc.dart';
 import 'package:bingo/bloc/pdf_data.dart';
+import 'package:bingo/color_utility.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdf/pdf.dart';
@@ -97,23 +96,15 @@ class _CollectDataViewState extends State<CollectDataView> {
   }
 
   void _pickImage(Function(pw.MemoryImage?) onImagePicked) async {
-    final html.FileUploadInputElement uploadInput =
-        html.FileUploadInputElement();
-    uploadInput.accept = 'image/*';
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) {
-      final files = uploadInput.files;
-      if (files!.isNotEmpty) {
-        final reader = html.FileReader();
-        reader.readAsArrayBuffer(files[0]);
-        reader.onLoadEnd.listen((e) {
-          setState(() {
-            onImagePicked(pw.MemoryImage(reader.result as Uint8List));
-          });
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.isNotEmpty) {
+      final fileBytes = result.files.first.bytes;
+      if (fileBytes != null) {
+        setState(() {
+          onImagePicked(pw.MemoryImage(fileBytes));
         });
       }
-    });
+    }
   }
 
   void _submitData(BingoBloc bloc) {
@@ -137,11 +128,11 @@ class _CollectDataViewState extends State<CollectDataView> {
               jokerImage: jokerImage,
               backsideText: backsideText,
               fancyTitle: fancyTitle,
-              titleColor: PdfColor.fromInt(titleColor.value),
-              descriptionColor: PdfColor.fromInt(descriptionColor.value),
-              backsideTextColor: PdfColor.fromInt(backsideTextColor.value),
-              gridColor: PdfColor.fromInt(gridColor.value),
-              gridTextColor: PdfColor.fromInt(gridTextColor.value),
+              titleColor: PdfColor.fromInt(titleColor.toInt()),
+              descriptionColor: PdfColor.fromInt(descriptionColor.toInt()),
+              backsideTextColor: PdfColor.fromInt(backsideTextColor.toInt()),
+              gridColor: PdfColor.fromInt(gridColor.toInt()),
+              gridTextColor: PdfColor.fromInt(gridTextColor.toInt()),
               fancyBackside: fancyBackside,
               middleJoker: middleJoker,
             ),

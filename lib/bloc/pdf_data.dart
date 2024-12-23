@@ -97,14 +97,14 @@ class PdfData {
       description: json['description'],
       bingosPerPage: json['bingosPerPage'],
       bingoCount: json['bingoCount'],
-      titleColor: PdfColor.fromInt(HexColor.fromHex(json['titleColor']).value),
+      titleColor: PdfColor.fromInt(int.parse(json['titleColor'], radix: 16)),
       descriptionColor:
-          PdfColor.fromInt(HexColor.fromHex(json['descriptionColor']).value),
+          PdfColor.fromInt(int.parse(json['descriptionColor'], radix: 16)),
       backsideTextColor:
-          PdfColor.fromInt(HexColor.fromHex(json['backsideTextColor']).value),
-      gridColor: PdfColor.fromInt(HexColor.fromHex(json['gridColor']).value),
+          PdfColor.fromInt(int.parse(json['backsideTextColor'], radix: 16)),
+      gridColor: PdfColor.fromInt(int.parse(json['gridColor'], radix: 16)),
       gridTextColor:
-          PdfColor.fromInt(HexColor.fromHex(json['gridTextColor']).value),
+          PdfColor.fromInt(int.parse(json['gridTextColor'], radix: 16)),
       fancyTitle: json['fancyTitle'],
       fancyBackside: json['fancyBackside'],
       middleJoker: json['middleJoker'],

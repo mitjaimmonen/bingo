@@ -1,5 +1,6 @@
 import 'package:bingo/bloc/pdf_data.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
@@ -36,7 +37,9 @@ class BingoBloc extends Bloc<BingoEvent, BingoState> {
     try {
       localStorage.setItem('pdfData', pdfData.toJson());
     } catch (e) {
-      print('Failed to save PDF data: $e');
+      if (kDebugMode) {
+        print('Failed to save PDF data: $e');
+      }
     }
   }
 
@@ -48,7 +51,10 @@ class BingoBloc extends Bloc<BingoEvent, BingoState> {
       } else {
         return PdfData.empty();
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
+      if (kDebugMode) {
+        print('Failed to load PDF data: $e\n$stacktrace');
+      }
       return PdfData.empty();
     }
   }
